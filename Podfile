@@ -8,6 +8,6 @@ target 'trackerApp' do
   # Pods for trackerApp
 
   pod 'Firebase/Analytics', '7.11.0'
-
+  pod 'Firebase/Core'
 
 end

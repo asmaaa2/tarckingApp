@@ -34,6 +34,14 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     var lastPoint = CLLocationCoordinate2D()
     var currentLocation : CLLocation?
     var isLocationUpdated = false
+    var timer: Timer?
+    var count = 5{
+        didSet{
+            if count == 0 {
+                Timer.invalidate(timer!)
+            }
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,6 +51,11 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyReduced
+        
+       timer =  Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+
+
+
 
         if isLocationServiceEnable(){
             checkAuthorization()
@@ -52,6 +65,14 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
         locationManager.allowsBackgroundLocationUpdates = true
         
+    }
+    
+   @objc func updateCounter() {
+        if(count > 0) {
+            count -= 1
+        }
+    
+    print("count: \(count)")
     }
     
     

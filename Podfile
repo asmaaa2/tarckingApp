@@ -9,5 +9,7 @@ target 'trackerApp' do
 
   pod 'Firebase/Analytics', '7.11.0'
   pod 'Firebase/Core'
-
+  pod 'Firebase/Database'
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Storage'
 end

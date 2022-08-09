@@ -45,5 +45,6 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("Hi smsm")
+        FirebaseRequest.readLocation()
     }
 }

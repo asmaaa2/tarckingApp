@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="0yb-lX-PJk">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="18122" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="18093"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -27,24 +26,7 @@
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="d2H-R0-hau" id="hJN-nK-FRH">
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="80"/>
                                             <autoresizingMask key="autoresizingMask"/>
-                                            <subviews>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="w3v-W0-nlM">
-                                                    <rect key="frame" x="330" y="16" width="68" height="48"/>
-                                                    <state key="normal" title="testFBBtn"/>
-                                                    <connections>
-                                                        <action selector="fbTestBtnAction:" destination="d2H-R0-hau" eventType="touchUpInside" id="HA1-WC-M5l"/>
-                                                    </connections>
-                                                </button>
-                                            </subviews>
-                                            <constraints>
-                                                <constraint firstItem="w3v-W0-nlM" firstAttribute="centerY" secondItem="hJN-nK-FRH" secondAttribute="centerY" id="8y0-QB-EGQ"/>
-                                                <constraint firstItem="w3v-W0-nlM" firstAttribute="top" secondItem="hJN-nK-FRH" secondAttribute="top" constant="16" id="KWC-Oo-4UT"/>
-                                                <constraint firstAttribute="trailing" secondItem="w3v-W0-nlM" secondAttribute="trailing" constant="16" id="vZv-IS-Axc"/>
-                                            </constraints>
                                         </tableViewCellContentView>
-                                        <connections>
-                                            <outlet property="fbTestBtn" destination="w3v-W0-nlM" id="dId-hg-Ah3"/>
-                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>

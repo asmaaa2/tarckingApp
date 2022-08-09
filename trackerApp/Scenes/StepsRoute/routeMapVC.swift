@@ -26,22 +26,17 @@ class CustomPin: NSObject , MKAnnotation {
     }
 }
 class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate {
-
+    
     @IBOutlet weak var routeMap: MKMapView!
     
     var locationManager = CLLocationManager()
-    var startPoint = CLLocationCoordinate2D()
-    var lastPoint = CLLocationCoordinate2D()
+    var startPoint = CLLocation()
+    var lastPoint = CLLocation()
     var currentLocation : CLLocation?
-    var isLocationUpdated = false
+    var isLocationUpdated : Bool?
     var timer: Timer?
-    var count = 5{
-        didSet{
-            if count == 0 {
-                Timer.invalidate(timer!)
-            }
-        }
-    }
+    var countFiveMin = 5
+ 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,13 +45,12 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         routeMap.showsUserLocation = true
         
         locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyReduced
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         
-       timer =  Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
-
-
-
-
+        timer =  Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: false)
+        
+        
+        
         if isLocationServiceEnable(){
             checkAuthorization()
         }else{
@@ -67,16 +61,16 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
     }
     
-   @objc func updateCounter() {
-        if(count > 0) {
-            count -= 1
+    @objc func updateCounter() {
+        if(countFiveMin > 0) {
+            countFiveMin -= 1
+        }else if countFiveMin == 0{
+            timer?.invalidate()
         }
-    
-    print("count: \(count)")
+        print("count: \(countFiveMin)")
     }
     
     
-
     func isLocationServiceEnable() -> Bool{
         return CLLocationManager.locationServicesEnabled()
     }
@@ -108,33 +102,24 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
     }
     
+ 
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        
-        currentLocation = locations.last!
-        
-        if (!isLocationUpdated){
-            isLocationUpdated = true
-        }
-        
-        
-        
-        
-        
-
+ 
         if let location = locations.last{
-            print("location: \(location.coordinate)")
-            startPoint = locations.first!.coordinate
-            zoomToUserLocation(location: location)
-            
-            // 37.33596949585537
-            // -122.00966921375925
-            
-            setupMapView(stLat: 37.33596949585537, stLong: -122.00966921375925, lastLat: location.coordinate.latitude, lastLong: location.coordinate.longitude)
-            
-//            locationManager.stopUpdatingLocation()
-
-        }
-//        locationManager.stopUpdatingLocation()
+                    print("location: \(location.coordinate)")
+                    zoomToUserLocation(location: location)
+                    if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
+                        self.lastPoint = location
+                        print("Moveing")
+                    }else{
+                        print("Stop move")
+                        updateCounter()
+                        startPoint = locations.first!
+                        lastPoint = locations.last!
+                        FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
+                    }
+                }
         
     }
     
@@ -164,70 +149,64 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         }
     }
     
-
     
     
-    private func setupMapView(stLat: Double, stLong: Double , lastLat: Double, lastLong: Double){
-            
-        // 37.33596949585537
-        // -122.00966921375925
-            
-            let sourceLocation = CLLocationCoordinate2D(latitude: stLat, longitude: stLong)
-            let destinationLocation = CLLocationCoordinate2D(latitude:  lastLat, longitude: lastLong)
-            
-            let soursePin = CustomPin(pinTitle: " ", pinSubtitle: " ", location: sourceLocation)
-            let destinationPin = CustomPin(pinTitle: " ", pinSubtitle: " ", location: destinationLocation)
-            
-            self.routeMap.removeAnnotations(routeMap.annotations.filter { $0 !== routeMap.userLocation })
-            
-            
-            self.routeMap.addAnnotation(soursePin)
-            self.routeMap.addAnnotation(destinationPin)
-            
-            let sourcePlaceMark = MKPlacemark(coordinate: sourceLocation)
-            
-            let destinationPlaceMark = MKPlacemark(coordinate: destinationLocation)
-            
-            let directionRequest = MKDirections.Request()
-            directionRequest.source = MKMapItem(placemark: sourcePlaceMark)
-            directionRequest.destination = MKMapItem(placemark: destinationPlaceMark)
-            directionRequest.transportType = .automobile
-            
-            let directions = MKDirections(request: directionRequest)
-            directions.calculate { (respons, err) in
-                guard let diractionRespons = respons else {
-                    if let err = err {
-                        print("We have error getting dircation: \(err.localizedDescription)")
-                    }
-                    return
+    
+     func setupMapView(stLat: Double, stLong: Double , lastLat: Double, lastLong: Double){
+  
+        let sourceLocation = CLLocationCoordinate2D(latitude: stLat, longitude: stLong)
+        let destinationLocation = CLLocationCoordinate2D(latitude:  lastLat, longitude: lastLong)
+        
+        let soursePin = CustomPin(pinTitle: " ", pinSubtitle: " ", location: sourceLocation)
+        let destinationPin = CustomPin(pinTitle: " ", pinSubtitle: " ", location: destinationLocation)
+        
+        self.routeMap.removeAnnotations(routeMap.annotations.filter { $0 !== routeMap.userLocation })
+        
+        
+        self.routeMap.addAnnotation(soursePin)
+        self.routeMap.addAnnotation(destinationPin)
+        
+        let sourcePlaceMark = MKPlacemark(coordinate: sourceLocation)
+        
+        let destinationPlaceMark = MKPlacemark(coordinate: destinationLocation)
+        
+        let directionRequest = MKDirections.Request()
+        directionRequest.source = MKMapItem(placemark: sourcePlaceMark)
+        directionRequest.destination = MKMapItem(placemark: destinationPlaceMark)
+        directionRequest.transportType = .automobile
+        
+        let directions = MKDirections(request: directionRequest)
+        directions.calculate { (respons, err) in
+            guard let diractionRespons = respons else {
+                if let err = err {
+                    print("We have error getting dircation: \(err.localizedDescription)")
                 }
-                
-                let rout = diractionRespons.routes[0]
-                
-                self.routeMap.removeOverlays(self.routeMap.overlays)
-                self.routeMap.addOverlay(rout.polyline, level: .aboveRoads)
-                let rect = rout.polyline.boundingMapRect
-                
-                self.routeMap.setRegion(MKCoordinateRegion(rect), animated: true)
+                return
             }
             
+            let rout = diractionRespons.routes[0]
             
-            self.routeMap.delegate = self
+            self.routeMap.removeOverlays(self.routeMap.overlays)
+            self.routeMap.addOverlay(rout.polyline, level: .aboveRoads)
+            let rect = rout.polyline.boundingMapRect
             
+            self.routeMap.setRegion(MKCoordinateRegion(rect), animated: true)
         }
+        
+        
+        self.routeMap.delegate = self
+        
+    }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            
-            let renderer =  MKPolylineRenderer(overlay: overlay)
-            
-            renderer.strokeColor = .systemBlue
-            renderer.lineWidth = 4
-            
-            return renderer
-        }
-    
-    
-    
+        
+        let renderer =  MKPolylineRenderer(overlay: overlay)
+        
+        renderer.strokeColor = .systemBlue
+        renderer.lineWidth = 4
+        
+        return renderer
+    }
     
     
     func showAlert(massage: String){
@@ -235,5 +214,5 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         alert.addAction(UIAlertAction(title: "Cancel", style: .default))
         present(alert, animated: true, completion: nil)
     }
-
+    
 }

@@ -17,7 +17,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         
         FirebaseApp.configure()
-        Database.database().reference().child("POMAC").setValue("Hallo World 77!")
         UIApplication.shared.isIdleTimerDisabled = true
        
         

@@ -83,6 +83,7 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         case .authorizedWhenInUse:
             locationManager.requestAlwaysAuthorization()
             locationManager.startUpdatingLocation()
+            centerViewOnUserLocation()
             routeMap.showsUserLocation = true
             break
         case .authorizedAlways:
@@ -102,13 +103,27 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
     }
     
+    
+    private func centerViewOnUserLocation(){
+            if let location = locationManager.location?.coordinate{
+                let region = MKCoordinateRegion(center: location, latitudinalMeters: 1000, longitudinalMeters: 1000)
+                routeMap.setRegion(region, animated: true)
+                
+            }
+        }
+    
  
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
  
+        print("firstLoc: \(locations.first)")
+        print("lastLoc: \(locations.last)")
+
+        
+        
         if let location = locations.last{
                     print("location: \(location.coordinate)")
-                    zoomToUserLocation(location: location)
+//                    zoomToUserLocation(location: location)
                     if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
                         self.lastPoint = location
                         print("Moveing")
@@ -117,9 +132,12 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
                         updateCounter()
                         startPoint = locations.first!
                         lastPoint = locations.last!
+                        locationManager.stopUpdatingLocation()
                         FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
                     }
                 }
+        
+        setupMapView(stLat: startPoint.coordinate.latitude, stLong: startPoint.coordinate.longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
         
     }
     
@@ -149,7 +167,7 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         }
     }
     
-    
+
     
     
      func setupMapView(stLat: Double, stLong: Double , lastLat: Double, lastLong: Double){
@@ -198,6 +216,8 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         
     }
     
+    
+    //MARK:- MapKit Delegate
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         
         let renderer =  MKPolylineRenderer(overlay: overlay)

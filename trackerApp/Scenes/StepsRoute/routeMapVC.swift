@@ -25,6 +25,8 @@ class CustomPin: NSObject , MKAnnotation {
         
     }
 }
+
+
 class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate {
     
     @IBOutlet weak var routeMap: MKMapView!
@@ -119,9 +121,7 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         print("firstLoc: \(locations.first)")
         print("lastLoc: \(locations.last)")
 
-        
-        
-        if let location = locations.last{
+          if let location = locations.last{
                     print("location: \(location.coordinate)")
 //                    zoomToUserLocation(location: location)
                     if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {

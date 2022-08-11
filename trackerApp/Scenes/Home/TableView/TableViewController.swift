@@ -21,6 +21,7 @@ class TableViewController: UIViewController {
         tripsView.delegate = self
         tripsView.dataSource = self
         navigationItem.title = "Simple Table View"
+        
     }
 
 
@@ -46,6 +47,11 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print("Hi smsm")
         FirebaseRequest.readLocation()
+        
+        let mapVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "routeMapVC") as! routeMapVC
+        self.navigationController?.pushViewController(mapVC, animated: true)
+//        mapVC.startPoint = //CLLocation
+//        mapVC.lastPoint = //CLLocation
 
     }
 }

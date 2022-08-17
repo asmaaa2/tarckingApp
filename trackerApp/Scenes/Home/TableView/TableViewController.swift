@@ -34,7 +34,7 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource{
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TableViewCell", for: indexPath)
-        cell.textLabel?.text = "This is Your Trip Number "
+        cell.textLabel?.text = "This is Your Trip Number  \(indexPath.row)"
         
         return cell
     }
@@ -52,6 +52,5 @@ extension TableViewController: UITableViewDelegate, UITableViewDataSource{
         self.navigationController?.pushViewController(mapVC, animated: true)
 //        mapVC.startPoint = //CLLocation
 //        mapVC.lastPoint = //CLLocation
-
     }
 }

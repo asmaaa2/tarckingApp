@@ -35,23 +35,16 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     var startPoint = CLLocation()
     var lastPoint = CLLocation()
     var currentLocation : CLLocation?
+    var testcoords:[CLLocationCoordinate2D] = []
     var isLocationUpdated : Bool?
     var timer: Timer?
     var countFiveMin = 5
- 
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        routeMap.delegate = self
-        routeMap.showsUserLocation = true
-        
-        locationManager.delegate = self
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        
+        setUp()
         timer =  Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: false)
-        
-        
         
         if isLocationServiceEnable(){
             checkAuthorization()
@@ -59,8 +52,19 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
             showAlert(massage: "Please Enable Location Service to check Your Location")
         }
         
-        locationManager.allowsBackgroundLocationUpdates = true
         
+    }
+    
+    func setUp(){
+        routeMap.delegate = self
+        routeMap.showsUserLocation = true
+        
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.startUpdatingLocation()
+        locationManager.requestAlwaysAuthorization()
+        locationManager.allowsBackgroundLocationUpdates = true
+        locationManager.pausesLocationUpdatesAutomatically = false
     }
     
     @objc func updateCounter() {
@@ -107,43 +111,58 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     
     
     private func centerViewOnUserLocation(){
-            if let location = locationManager.location?.coordinate{
-                let region = MKCoordinateRegion(center: location, latitudinalMeters: 1000, longitudinalMeters: 1000)
-                routeMap.setRegion(region, animated: true)
-                
-            }
+        if let location = locationManager.location?.coordinate{
+            let region = MKCoordinateRegion(center: location, latitudinalMeters: 30000, longitudinalMeters: 30000)
+            routeMap.setRegion(region, animated: true)
+            
         }
+    }
     
- 
+    
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
- 
-        print("firstLoc: \(locations.first)")
-        print("lastLoc: \(locations.last)")
-
-          if let location = locations.last{
-                    print("location: \(location.coordinate)")
-//                    zoomToUserLocation(location: location)
-                    if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
-                        self.lastPoint = location
-                        print("Moveing")
-                    }else{
-                        print("Stop move")
-                        updateCounter()
-                        startPoint = locations.first!
-                        lastPoint = locations.last!
-                        locationManager.stopUpdatingLocation()
-                        FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
-                    }
-                }
         
-        setupMapView(stLat: startPoint.coordinate.latitude, stLong: startPoint.coordinate.longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
+        if let location = locations.last{
+            print("location: \(location.coordinate)")
+            
+            for location in locations{
+                testcoords.append(location.coordinate)
+                startPoint = locations[0]
+                
+            }
+            
+            if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
+                self.lastPoint = location
+                print("Moveing")
+                print("locations.array: \(testcoords)")
+                print("zeroLoc: \(testcoords[0].latitude)")
+                let locationsLine = MKPolyline(coordinates: testcoords, count: testcoords.count)
+                routeMap.addOverlay(locationsLine)
+                
+                
+            }else{
+                print("Stop move")
+                
+                updateCounter()
+                lastPoint = locations.last!
+                
+                locationManager.stopUpdatingLocation()
+                print("zeroLoc2: \(locations[0])")
+                FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
+            }
+        }
+        
+        let zoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 5000)
+        //        (maxCenterCoordinateDistance: 30000)
+        routeMap.setCameraZoomRange(zoomRange, animated: true)
+        setupMapView(stLat: testcoords[0].latitude, stLong: testcoords[0].longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
+        
         
     }
     
     
     func zoomToUserLocation(location: CLLocation){
-        let region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 500, longitudinalMeters: 500)
+        let region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
         routeMap.setRegion(region, animated: true)
     }
     
@@ -167,11 +186,11 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         }
     }
     
-
     
     
-     func setupMapView(stLat: Double, stLong: Double , lastLat: Double, lastLong: Double){
-  
+    
+    func setupMapView(stLat: Double, stLong: Double , lastLat: Double, lastLong: Double){
+        
         let sourceLocation = CLLocationCoordinate2D(latitude: stLat, longitude: stLong)
         let destinationLocation = CLLocationCoordinate2D(latitude:  lastLat, longitude: lastLong)
         
@@ -217,15 +236,14 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     }
     
     
-    //MARK:- MapKit Delegate
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        
-        let renderer =  MKPolylineRenderer(overlay: overlay)
-        
-        renderer.strokeColor = .systemBlue
-        renderer.lineWidth = 4
-        
-        return renderer
+        if let polyline = overlay as? MKPolyline {
+            let testlineRenderer = MKPolylineRenderer(polyline: polyline)
+            testlineRenderer.strokeColor = .systemGreen
+            testlineRenderer.lineWidth = 10.0
+            return testlineRenderer
+        }
+        fatalError("Something wrong during draw line...")
     }
     
     
@@ -234,5 +252,6 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         alert.addAction(UIAlertAction(title: "Cancel", style: .default))
         present(alert, animated: true, completion: nil)
     }
+    
     
 }

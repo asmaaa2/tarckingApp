@@ -11,32 +11,15 @@ import CoreLocation
 
 @available(iOS 14.0, *)
 
-class CustomPin: NSObject , MKAnnotation {
-    
-    var coordinate: CLLocationCoordinate2D
-    var title: String?
-    var subtitle: String?
-    
-    
-    init(pinTitle: String, pinSubtitle: String, location: CLLocationCoordinate2D) {
-        self.title = pinTitle
-        self.subtitle = pinSubtitle
-        self.coordinate = location
-        
-    }
-}
-
-
 class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate {
     
     @IBOutlet weak var routeMap: MKMapView!
+    @IBOutlet weak var stopTrip: UIButton!
     
     var locationManager = CLLocationManager()
     var startPoint = CLLocation()
     var lastPoint = CLLocation()
-    var currentLocation : CLLocation?
     var testcoords:[CLLocationCoordinate2D] = []
-    var isLocationUpdated : Bool?
     var timer: Timer?
     var countFiveMin = 5
     
@@ -44,7 +27,10 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-        timer =  Timer.scheduledTimer(timeInterval: 60.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: false)
+        
+        
+        timer =  Timer.scheduledTimer(timeInterval: 25.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+        
         
         if isLocationServiceEnable(){
             checkAuthorization()
@@ -58,20 +44,23 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     func setUp(){
         routeMap.delegate = self
         routeMap.showsUserLocation = true
+        stopTrip.layer.cornerRadius = 20
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.startUpdatingLocation()
         locationManager.requestAlwaysAuthorization()
         locationManager.allowsBackgroundLocationUpdates = true
         locationManager.pausesLocationUpdatesAutomatically = false
     }
     
+    
     @objc func updateCounter() {
         if(countFiveMin > 0) {
+            locationManager.stopUpdatingLocation()
             countFiveMin -= 1
         }else if countFiveMin == 0{
             timer?.invalidate()
+            FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
         }
         print("count: \(countFiveMin)")
     }
@@ -127,8 +116,9 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
             
             for location in locations{
                 testcoords.append(location.coordinate)
-                startPoint = locations[0]
-                
+                let startlocation2D = CLLocationCoordinate2D(latitude: testcoords[0].latitude, longitude: testcoords[0].longitude)
+                startPoint = CLLocation(startlocation2D)!
+                print("startLoc: \(startPoint)")
             }
             
             if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
@@ -142,30 +132,21 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
                 
             }else{
                 print("Stop move")
-                
-                updateCounter()
                 lastPoint = locations.last!
-                
-                locationManager.stopUpdatingLocation()
+                updateCounter()
+//                locationManager.stopUpdatingLocation()
                 print("zeroLoc2: \(locations[0])")
-                FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
+//                FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
             }
         }
         
         let zoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 5000)
-        //        (maxCenterCoordinateDistance: 30000)
         routeMap.setCameraZoomRange(zoomRange, animated: true)
         setupMapView(stLat: testcoords[0].latitude, stLong: testcoords[0].longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
         
         
     }
-    
-    
-    func zoomToUserLocation(location: CLLocation){
-        let region = MKCoordinateRegion(center: location.coordinate, latitudinalMeters: 1000, longitudinalMeters: 1000)
-        routeMap.setRegion(region, animated: true)
-    }
-    
+
     func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         switch status {
         case .authorizedWhenInUse:
@@ -198,8 +179,6 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         let destinationPin = CustomPin(pinTitle: " ", pinSubtitle: " ", location: destinationLocation)
         
         self.routeMap.removeAnnotations(routeMap.annotations.filter { $0 !== routeMap.userLocation })
-        
-        
         self.routeMap.addAnnotation(soursePin)
         self.routeMap.addAnnotation(destinationPin)
         
@@ -254,4 +233,16 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     }
     
     
+    
+    @IBAction func endWalkingActionBtn(_ sender: Any) {
+//        locationManager.stopUpdatingLocation()
+        updateCounter()
+        let tableVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
+        self.navigationController?.popToViewController(tableVC, animated: true)
+        
+    }
 }
+
+
+
+

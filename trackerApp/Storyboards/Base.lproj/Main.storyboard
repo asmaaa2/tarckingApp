@@ -60,18 +60,33 @@
                             <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="YyG-4Q-Sbq">
                                 <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                             </mapView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dKm-oN-QGr">
+                                <rect key="frame" x="299" y="76" width="83" height="45"/>
+                                <color key="backgroundColor" systemColor="systemRedColor"/>
+                                <state key="normal" title="Stop">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="endWalkingActionBtn:" destination="0yb-lX-PJk" eventType="touchUpInside" id="bYD-xr-Wg2"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="1f1-No-n5j"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="dKm-oN-QGr" firstAttribute="top" secondItem="1f1-No-n5j" secondAttribute="top" constant="32" id="7BU-Re-pqw"/>
                             <constraint firstItem="YyG-4Q-Sbq" firstAttribute="leading" secondItem="1f1-No-n5j" secondAttribute="leading" id="BPi-pg-IgV"/>
+                            <constraint firstItem="dKm-oN-QGr" firstAttribute="width" secondItem="YyG-4Q-Sbq" secondAttribute="width" multiplier="0.2" id="Nbg-oj-sDb"/>
+                            <constraint firstItem="dKm-oN-QGr" firstAttribute="height" secondItem="YyG-4Q-Sbq" secondAttribute="height" multiplier="0.05" id="Q4E-sA-Pyq"/>
                             <constraint firstItem="YyG-4Q-Sbq" firstAttribute="top" secondItem="eKe-kt-45g" secondAttribute="top" id="eUC-MR-Da0"/>
                             <constraint firstItem="1f1-No-n5j" firstAttribute="trailing" secondItem="YyG-4Q-Sbq" secondAttribute="trailing" id="u8v-lS-vEf"/>
                             <constraint firstAttribute="bottom" secondItem="YyG-4Q-Sbq" secondAttribute="bottom" id="upy-q6-5yZ"/>
+                            <constraint firstItem="1f1-No-n5j" firstAttribute="trailing" secondItem="dKm-oN-QGr" secondAttribute="trailing" constant="32" id="xUj-5f-umI"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="routeMap" destination="YyG-4Q-Sbq" id="IgD-7C-O0e"/>
+                        <outlet property="stopTrip" destination="dKm-oN-QGr" id="YjB-pZ-dqK"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tYg-Vx-rzl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
@@ -96,68 +111,13 @@
             </objects>
             <point key="canvasLocation" x="95.652173913043484" y="36.830357142857139"/>
         </scene>
-        <!--Map View Controller-->
-        <scene sceneID="FKW-FV-7e7">
-            <objects>
-                <viewController storyboardIdentifier="MapViewController" id="DhS-Z0-5HW" customClass="MapViewController" customModule="trackerApp" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="I8m-GI-uLZ">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="6DQ-vE-Xu7">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                            </mapView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="qVc-Lf-fN2"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="trailing" secondItem="6DQ-vE-Xu7" secondAttribute="trailing" id="6io-4I-J6G"/>
-                            <constraint firstAttribute="bottom" secondItem="6DQ-vE-Xu7" secondAttribute="bottom" id="Vxs-ew-Tb2"/>
-                            <constraint firstItem="6DQ-vE-Xu7" firstAttribute="top" secondItem="I8m-GI-uLZ" secondAttribute="top" id="ghX-hI-msV"/>
-                            <constraint firstItem="6DQ-vE-Xu7" firstAttribute="leading" secondItem="I8m-GI-uLZ" secondAttribute="leading" id="pQe-Wd-DnW"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="mapVC" destination="6DQ-vE-Xu7" id="wt5-k1-ylM"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="saL-z3-xEj" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2196" y="37"/>
-        </scene>
-        <!--Polyline Test View Controller-->
-        <scene sceneID="5cN-3G-QPV">
-            <objects>
-                <viewController storyboardIdentifier="PolylineTestViewController" id="KzE-kd-bbE" customClass="PolylineTestViewController" customModule="trackerApp" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="zl1-xP-XME">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <mapView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" mapType="standard" translatesAutoresizingMaskIntoConstraints="NO" id="yNF-SF-B04">
-                                <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
-                            </mapView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="SPF-Gq-H91"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstAttribute="bottom" secondItem="yNF-SF-B04" secondAttribute="bottom" id="Kqo-EI-PIl"/>
-                            <constraint firstAttribute="trailing" secondItem="yNF-SF-B04" secondAttribute="trailing" id="XCd-vv-fAx"/>
-                            <constraint firstItem="yNF-SF-B04" firstAttribute="top" secondItem="zl1-xP-XME" secondAttribute="top" id="tX4-Ww-L2v"/>
-                            <constraint firstItem="yNF-SF-B04" firstAttribute="leading" secondItem="zl1-xP-XME" secondAttribute="leading" id="uyb-Li-V7D"/>
-                        </constraints>
-                    </view>
-                    <connections>
-                        <outlet property="polylineMap" destination="yNF-SF-B04" id="SMl-cc-Igj"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="R82-oU-dEH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2920" y="37"/>
-        </scene>
     </scenes>
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>

@@ -15,6 +15,7 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     
     @IBOutlet weak var routeMap: MKMapView!
     @IBOutlet weak var stopTrip: UIButton!
+    @IBOutlet weak var startTripAgain: UIButton!
     
     var locationManager = CLLocationManager()
     var startPoint = CLLocation()
@@ -27,17 +28,16 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     override func viewDidLoad() {
         super.viewDidLoad()
         setUp()
-        
-        
-        timer =  Timer.scheduledTimer(timeInterval: 25.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
-        
-        
+       
+        timer =  Timer.scheduledTimer(timeInterval: 10.0, target: self, selector: #selector(updateCounter), userInfo: nil, repeats: true)
+      
         if isLocationServiceEnable(){
             checkAuthorization()
         }else{
             showAlert(massage: "Please Enable Location Service to check Your Location")
         }
         
+        setupMapView(stLat: startPoint.coordinate.latitude, stLong: startPoint.coordinate.longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
         
     }
     
@@ -45,6 +45,7 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         routeMap.delegate = self
         routeMap.showsUserLocation = true
         stopTrip.layer.cornerRadius = 20
+        startTripAgain.layer.cornerRadius = 20
         
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
@@ -61,8 +62,11 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
         }else if countFiveMin == 0{
             timer?.invalidate()
             FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
+            let tableVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
+            self.navigationController?.popToViewController(tableVC, animated: true)
         }
         print("count: \(countFiveMin)")
+
     }
     
     
@@ -124,25 +128,18 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
             if (lastPoint.coordinate.latitude != locations.last?.coordinate.latitude) && (lastPoint.coordinate.longitude != locations.last?.coordinate.longitude) {
                 self.lastPoint = location
                 print("Moveing")
-                print("locations.array: \(testcoords)")
-                print("zeroLoc: \(testcoords[0].latitude)")
                 let locationsLine = MKPolyline(coordinates: testcoords, count: testcoords.count)
                 routeMap.addOverlay(locationsLine)
-                
-                
             }else{
                 print("Stop move")
                 lastPoint = locations.last!
                 updateCounter()
-//                locationManager.stopUpdatingLocation()
-                print("zeroLoc2: \(locations[0])")
-//                FirebaseRequest.writeLocation(startPointValue: startPoint, endPointValue: lastPoint)
             }
         }
         
         let zoomRange = MKMapView.CameraZoomRange(minCenterCoordinateDistance: 5000)
         routeMap.setCameraZoomRange(zoomRange, animated: true)
-        setupMapView(stLat: testcoords[0].latitude, stLong: testcoords[0].longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
+        setupMapView(stLat: startPoint.coordinate.latitude, stLong: startPoint.coordinate.longitude, lastLat: lastPoint.coordinate.latitude, lastLong: lastPoint.coordinate.longitude)
         
         
     }
@@ -235,12 +232,16 @@ class routeMapVC: UIViewController,CLLocationManagerDelegate, MKMapViewDelegate 
     
     
     @IBAction func endWalkingActionBtn(_ sender: Any) {
-//        locationManager.stopUpdatingLocation()
         updateCounter()
-        let tableVC = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "TableViewController") as! TableViewController
-        self.navigationController?.popToViewController(tableVC, animated: true)
+        
         
     }
+    
+    @IBAction func startWlakingAgain(_ sender: Any) {
+        locationManager.startUpdatingLocation()
+        countFiveMin = 5
+    }
+    
 }
 
 
